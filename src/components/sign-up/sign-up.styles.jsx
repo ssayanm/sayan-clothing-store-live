@@ -7,5 +7,5 @@ export const SignUpContainer = styled.div`
 `;
 
 export const SignUpTitle = styled.h2`
-  margin: 20px 0;
+  margin: 10px 0;
 `;
