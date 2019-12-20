@@ -1,17 +1,21 @@
 import React from "react";
 import { Route } from "react-router-dom";
-import CollectionsOverview from "../../components/collection-overview/collection-overview.component";
-// import CollectionPage from "../collection/collection.component";
 import { connect } from "react-redux";
-import { updateCollections } from "../../redux/shop/shop.actions";
-import WithSpinner from "../../components/with-spinner/with-spinner.component";
+
 import {
   firestore,
   convertCollectionsSnapshotToMap
-} from "../../firebase/firebase.utils";
+} from "../../firebase/firebase.utils.js";
+
+import { updateCollections } from "../../redux/shop/shop.actions";
+
+import WithSpinner from "../../components/with-spinner/with-spinner.component";
+
+import CollectionsOverview from "../../components/collection-overview/collection-overview.component";
+import CollectionPage from "../collection/collection.component";
 
 const CollectionsOverviewWithSpinner = WithSpinner(CollectionsOverview);
-const CollectionsPageWithSpinner = WithSpinner(CollectionsOverview);
+const CollectionPageWithSpinner = WithSpinner(CollectionPage);
 
 class ShopPage extends React.Component {
   state = {
@@ -24,6 +28,11 @@ class ShopPage extends React.Component {
     const { updateCollections } = this.props;
     const collectionRef = firestore.collection("collections");
 
+    // fetch(
+    //   "https://firestore.googleapis.com/v1/projects/clothing-db-293a6/databases/(default)/documents/collections"
+    // ).then(response =>
+    //   response.json().then(collections => console.log(collections))
+    // );
     collectionRef.get().then(snapshot => {
       const collectionsMap = convertCollectionsSnapshotToMap(snapshot);
       updateCollections(collectionsMap);
@@ -46,7 +55,7 @@ class ShopPage extends React.Component {
         <Route
           path={`${match.path}/:collectionId`}
           render={props => (
-            <CollectionsPageWithSpinner isLoading={loading} {...props} />
+            <CollectionPageWithSpinner isLoading={loading} {...props} />
           )}
         />
       </div>
