@@ -6,7 +6,7 @@ import CustomButton from "../custom-button/custom-button.component";
 import {
   googleSignInStart,
   emailSignInStart
-} from "../../redux/user/user.action";
+} from "../../redux/user/user.actions";
 
 import {
   SignInContainer,
@@ -26,7 +26,10 @@ class SignIn extends React.Component {
 
   handleSubmit = async event => {
     event.preventDefault();
+    const { emailSignInStart } = this.props;
     const { email, password } = this.state;
+
+    emailSignInStart(email, password);
   };
 
   handleChange = event => {
