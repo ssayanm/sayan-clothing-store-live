@@ -16,13 +16,14 @@ firebase.initializeApp(config);
 
 export const createUserProfileDocument = async (userAuth, additionalData) => {
   if (!userAuth) return;
+
   const userRef = firestore.doc(`users/${userAuth.uid}`);
+
   const snapShot = await userRef.get();
 
   if (!snapShot.exists) {
     const { displayName, email } = userAuth;
     const createdAt = new Date();
-
     try {
       await userRef.set({
         displayName,
@@ -34,7 +35,21 @@ export const createUserProfileDocument = async (userAuth, additionalData) => {
       console.log("error creating user", error.message);
     }
   }
+
   return userRef;
+};
+
+export const getUserCartRef = async userId => {
+  const cartsRef = firestore.collection("carts").where("userId", "==", userId);
+  const snapShot = await cartsRef.get();
+
+  if (snapShot.empty) {
+    const cartDocRef = firestore.collection("carts").doc();
+    await cartDocRef.set({ userId, cartItems: [] });
+    return cartDocRef;
+  } else {
+    return snapShot.docs[0].ref;
+  }
 };
 
 export const addCollectionAndDocuments = async (
@@ -42,19 +57,20 @@ export const addCollectionAndDocuments = async (
   objectsToAdd
 ) => {
   const collectionRef = firestore.collection(collectionKey);
-  console.log(collectionRef);
+
   const batch = firestore.batch();
   objectsToAdd.forEach(obj => {
     const newDocRef = collectionRef.doc();
     batch.set(newDocRef, obj);
-    console.log(newDocRef);
   });
+
   return await batch.commit();
 };
 
 export const convertCollectionsSnapshotToMap = collections => {
   const transformedCollection = collections.docs.map(doc => {
     const { title, items } = doc.data();
+
     return {
       routeName: encodeURI(title.toLowerCase()),
       id: doc.id,
@@ -62,6 +78,7 @@ export const convertCollectionsSnapshotToMap = collections => {
       items
     };
   });
+
   return transformedCollection.reduce((accumulator, collection) => {
     accumulator[collection.title.toLowerCase()] = collection;
     return accumulator;
@@ -70,8 +87,8 @@ export const convertCollectionsSnapshotToMap = collections => {
 
 export const getCurrentUser = () => {
   return new Promise((resolve, reject) => {
-    const unsubscirbe = auth.onAuthStateChanged(userAuth => {
-      unsubscirbe();
+    const unsubscribe = auth.onAuthStateChanged(userAuth => {
+      unsubscribe();
       resolve(userAuth);
     }, reject);
   });
